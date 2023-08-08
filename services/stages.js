@@ -3,6 +3,7 @@ const Match = require('./../models/matches');
 const Team = require('../models/teams');
 const TeamService = require('./teams');
 const TournamentService = require('./tournament');
+const MatchService = require('./matches');
 
 exports.getStagesInfo = async function(){
     // get standings & results
@@ -22,15 +23,21 @@ exports.getStagesInfo = async function(){
     }
     
     var fixture_sets = await Promise.all(promises);
+    fixture_sets = await Promise.all(fixture_sets.map(fixs => {
+        return MatchService.getMatchTimings(fixs.filter(fix => fix.status != 'placeholder'));
+    }))
     // console.log('2')
-    stages.forEach((stage,i) => {
+    for(let i=0; i<stages.length; i++){
+        let stage = stages[i]
         if(stage.pool in res[stage.division] == false) res[stage.division][stage.pool] = {}
+
+        let fixs = fixture_sets[i]
 
         res[stage.division][stage.pool][stage.stage_name] = {
             info: stage,
-            fixtures: fixture_sets[i].filter(fix => fix.status != 'placeholder')
+            fixtures: fixs
         }
-    });
+    };
     // console.log('3')
 
     return {

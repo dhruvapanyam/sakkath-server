@@ -49,6 +49,9 @@ exports.getTeamResults = async function(id){
 exports.getTeamInfo = async function(id){
     var team_data = await Team.findById(id).populate("current_stage_id", "stage_name division type");
     var upcoming = await Match.findById(team_data?.upcoming_match_id).populate("team_1", "team_name logo roster").populate("team_2", "team_name logo roster").populate("stage", "stage_name division");
+    if(upcoming?.id){
+        upcoming = (await MatchService.getMatchTimings([upcoming]))[0]
+    }
     return {team_data, upcoming};
 }
 

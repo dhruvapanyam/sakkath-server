@@ -52,69 +52,54 @@ const TournamentService = require('./services/tournament');
 const { isAdmin, verifyToken } = require('./middleware/auth_jwt');
 
 mongoose.connect(
-    `mongodb+srv://dhruvapanyam16:dhruvapanyam@sakkath-db.ihmzxku.mongodb.net/?retryWrites=true&w=majority`
+    `mongodb+srv://dhruvapanyam16:dhruvapanyam@sakkath-db.ihmzxku.mongodb.net/?retryWrites=true&w=majority`,{
+        dbName: 'sakkath-demo'
+    }
 )
+.then(()=>{
+    console.log('connected to the DB!')
+})
 
+const team_details = require('./team_details/team_details.json')
+
+// --------------------------------------------------------------------------------
 async function run(){
-    // console.log(await Team.find().select("_id"));
-    // console.log(await Stage.find());
-    // console.log(await 
-    //     Match.find()
-    //         .populate("team_1", "team_name")
-    //         .populate("team_2", "team_name")
-    //         .populate("stage", "stage_name division")
-    //         );
 
+    // // create teams using team_details.json
+    // for(let team_data of team_details){
+    //     let team = await Team.create(team_data);
+    // }
+
+    // // delete all teams
     // await Team.deleteMany();
-    // console.log('hello',await Tournament.findOne())
 
-    // console.log(await Stage.findTransitionStage("A-R6", "Open"))
-    // let u = await UserService.signup({username: 'dpan', password: 'dpan'});
-    // console.log(u)
-    // console.log(await UserService.checkPassword('dpan',u.password));
+    // show all teams
+    // let teams = await Team.find();;
+    // console.log(teams)
 
-    // var teams = await Team.find();
-    // await User.deleteMany();
-    // var users = await User.find();
-    // console.log(users)
-    // for(let team of teams){
-    //     UserService.signup({
-    //         username: (team.team_code+team.division[0]).toLowerCase(),
-    //         password: (team.team_code+team.division[0]).toLowerCase(),
-    //         team_id: team.id,
-    //         role: 'captain'
+    // let timeslots = ['0630','0740','0850','1000','1110','1220','1330','1440','1550','1700']
+    // for(let i=0; i<30; i++){
+    //     await Slot.create({
+    //         timeslot_number: i,
+    //         start_time: timeslots[i%10]
+    //     })
+    // }
+
+    // for(let team of await Team.find()){
+    //     let username = (team.team_code + team.division[0]).toLowerCase();
+
+    //     await UserService.signup({
+    //         username,
+    //         password: username,
+    //         role: 'captain',
+    //         team_id: team._id
     //     })
     // }
 
 
-    // let m = (await Match.findOne());
-    // m.result = {...(new Match()).result};
-    // await m.save();
-    // console.log(m)
-
-    // let teams = await Team.find();
-    // for(let i=0; i<teams.length; i++){
-    //     teams[i].roster = [];
-    //     for(let j=1; j<16; j++){
-    //         teams[i].roster.push(`${teams[i].team_code} - Player ${j}`)
-    //     }
-    //     await teams[i].save();
-    // }
-
-    // console.log(teams);
-
-    // let slots = ["0630","0740","0850","1000","1100","1220","1330","1440","1550","1700"]
-    // for(let i=0; i<30; i++){
-    //     await Slot.create({
-    //         timeslot_number: i,
-    //         start_time: slots[i%10]
-    //     });
-    // }
-
-    // console.log(await Slot.find())
-
 }
 run();
+// --------------------------------------------------------------------------------
 
 
 // Teams
@@ -273,5 +258,27 @@ app.post('/timeslots_change', verifyToken, isAdmin, async (req, res) => {
     catch(e){
         console.log(e)
         res.status(400).json({message: e})
+    }
+})
+
+
+
+// app.get('/mvps', verifyToken, isAdmin, async (req, res) => {
+app.get('/mvps', async (req, res) => {
+    try{
+        let matches = await Match.find().where('status').equals('completed').select('team_1 team_2 spirit.mvp_1 spirit.mvp_2').populate('team_1','team_name division').populate('team_2','team_name division')
+        let team_mvps = {}
+        matches.forEach(match => {
+            if(match.team_1._id in team_mvps == false) team_mvps[match.team_1._id] = {team_name: match.team_1.team_name, division: match.team_1.division, mvps:[]};
+            if(match.team_2._id in team_mvps == false) team_mvps[match.team_2._id] = {team_name: match.team_2.team_name, division: match.team_2.division, mvps:[]};
+    
+            team_mvps[match.team_1._id].mvps.push(match.spirit?.mvp_1);
+            team_mvps[match.team_2._id].mvps.push(match.spirit?.mvp_2);
+        })
+        return res.json(team_mvps);
+    }
+    catch(e){
+        console.log(e)
+        res.status(500).json({message:e});
     }
 })
