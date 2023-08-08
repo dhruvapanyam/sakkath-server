@@ -60,7 +60,7 @@ mongoose.connect(
     console.log('connected to the DB!')
 })
 
-const team_details = require('./team_details/team_details.json')
+// const team_details = require('./team_details/team_details.json')
 
 // --------------------------------------------------------------------------------
 async function run(){
