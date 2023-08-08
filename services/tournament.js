@@ -163,6 +163,7 @@ const beginNewSwissStage = async function(stage_data){
                 played: 0,
                 won: 0,
                 lost: 0,
+                drawn: 0,
                 points: 0,
                 OPT: 0,
                 GD: 0
@@ -191,7 +192,7 @@ const beginNewSwissStage = async function(stage_data){
     stage_data.table = [...points_table];
     await stage_data.save();
 
-    await StageService.updatePointsTable(stage_data);
+    await StageService.updatePointsTable(stage_data, initial);
 
     // await TeamService.setTeamStageRanks(stage_data.id, points_table)
 

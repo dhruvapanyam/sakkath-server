@@ -25,7 +25,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-const PORT = process.env.PORT || 4040;
+const PORT = process.env.PORT || 80;
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`)
 });
@@ -281,4 +281,10 @@ app.get('/mvps', async (req, res) => {
         console.log(e)
         res.status(500).json({message:e});
     }
+})
+
+
+
+app.get('/health', (req, res) => {
+    return res.status(200).send();
 })

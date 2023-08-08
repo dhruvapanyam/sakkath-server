@@ -81,7 +81,7 @@ exports.updateBracketTable = async function(match, stage_id){
 }
 
 
-exports.updatePointsTable = async function(stage){
+exports.updatePointsTable = async function(stage, initial_stage=false){
     // update stage.table
     console.log('updatePointsTable')
     
@@ -156,7 +156,9 @@ exports.updatePointsTable = async function(stage){
     // console.log('calculating table')
     // calculate rank
     // -----------IMPORTANT-----------
-    let table_rows = await TournamentService.sortSwissTable(Object.values(new_table));
+    var table_rows = Object.values(new_table);
+    if(!initial_stage)
+        table_rows = await TournamentService.sortSwissTable(Object.values(new_table));
     // console.log('sorted table:',table_rows)
     for(let i=0; i<table_rows.length; i++){
         console.log('rank',i,'points',table_rows[i].points);
