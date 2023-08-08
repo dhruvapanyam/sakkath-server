@@ -141,10 +141,10 @@ exports.updatePointsTable = async function(stage, initial_stage=false){
     for(let team in new_table){
         let opt = 0;
         for(let res of results){
-            if(res.team_1 == team) {
+            if(res.team_1._id == team) {
                 opt += new_table[res.team_2].points;
             }
-            else if(res.team_2 == team) {
+            else if(res.team_2._id == team) {
                 opt += new_table[res.team_1].points;
             }
         }
@@ -153,13 +153,12 @@ exports.updatePointsTable = async function(stage, initial_stage=false){
 
     console.log('new table:',new_table)
 
-    // console.log('calculating table')
+
     // calculate rank
     // -----------IMPORTANT-----------
     var table_rows = Object.values(new_table);
-    if(!initial_stage)
-        table_rows = await TournamentService.sortSwissTable(Object.values(new_table));
-    // console.log('sorted table:',table_rows)
+    table_rows = await TournamentService.sortSwissTable(Object.values(new_table));
+
     for(let i=0; i<table_rows.length; i++){
         console.log('rank',i,'points',table_rows[i].points);
         new_table[table_rows[i].team_id].rank = i;

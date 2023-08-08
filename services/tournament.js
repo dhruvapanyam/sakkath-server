@@ -192,9 +192,8 @@ const beginNewSwissStage = async function(stage_data){
     stage_data.table = [...points_table];
     await stage_data.save();
 
+    // 
     await StageService.updatePointsTable(stage_data, initial);
-
-    // await TeamService.setTeamStageRanks(stage_data.id, points_table)
 
 
     var S = new SwissDrawManager();
@@ -202,11 +201,8 @@ const beginNewSwissStage = async function(stage_data){
     if(pairings == null) throw `Could not make Swiss Draw pairings!`
 
 
-    // console.log(stage_data.stage_name, pairings)
 
     // add fixtures
-    // 
-
     await addStageFixtures(stage_data, pairings, 'Swiss');
 
 }
@@ -463,10 +459,16 @@ const createStages = async function(formats, pools){
 exports.sortSwissTable = async function(rows){
     // get match history of these teams
     var group_matches = await Match.getByTeams(rows.map(row => row.team_id));
+    var team_names = {}
+    var team_data = await Team.find().select('team_name');
+    team_data.forEach(team => {
+        if(team._id in team_names == false) team_names[team._id] = team.team_name.toLowerCase();
+    })
+    console.log(team_names)
 
     // dictionary of all teams defeated
     var defeated_opps = {};
-    console.log('rows:',rows)
+    // console.log('rows:',rows)
     rows.forEach(row => {defeated_opps[row.team_id.toString()] = new Set()})
     group_matches.forEach(match => {
         if(match.status != 'completed') return;
@@ -488,10 +490,10 @@ exports.sortSwissTable = async function(rows){
     // for(let team in team_names)
     //     console.log(team_names[team], Array.from(defeated_opps[team]).map(t=>team_names[t]));
 
-    rows = rows
-            .map(value => ({ value, sort: Math.random() }))
-            .sort((a, b) => a.sort - b.sort)
-            .map(({ value }) => value)
+    // rows = rows
+    //         .map(value => ({ value, sort: Math.random() }))
+    //         .sort((a, b) => a.sort - b.sort)
+    //         .map(({ value }) => value)
     
     rows.sort((r1,r2) => {
         if(r2.points > r1.points) return 1;
@@ -506,13 +508,15 @@ exports.sortSwissTable = async function(rows){
         if(r2.GD > r1.GD) return 1;
         if(r2.GD < r1.GD) return -1;
 
-        if(r1.team_id > r2.team_id) return 1;
-        if(r1.team_id > r2.team_id) return -1;
+        console.log('sorting by name');
+
+        if(team_names[r1.team_id] > team_names[r2.team_id]) return 1;
+        if(team_names[r1.team_id] < team_names[r2.team_id]) return -1;
 
         return -1;
     })
 
-    console.log(rows);
+    console.log(rows.map(row => {return {rank:row.rank,name:team_names[row.team_id]}}));
 
     return rows;
 

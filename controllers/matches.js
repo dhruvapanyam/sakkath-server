@@ -33,26 +33,32 @@ exports.addResult = async function(req, res, next){
     // console.log(match_id, result_data);
     try{
 
-        // please uncomment!!!
+        // var temp_team_1 = req.body.temp_team_1;
+        // var temp_team_2 = req.body.temp_team_2;
 
-        // // check if user_id is a valid user (token has been verified)
-        // var [user, fixture] = await Promise.all([User.findById(user_id), Match.findById(match_id)]);
-        // if(user.team_id == null){
-        //     throw `Unauthorized to add this result`;
-        // }
-        // if(fixture.team_1.toString() != user.team_id.toString() && fixture.team_2.toString() != user.team_id.toString()){
-        //     throw `Unauthorized to add this result`;
-        // }
-
-        var temp_team_1 = req.body.temp_team_1;
-        var temp_team_2 = req.body.temp_team_2;
-
-        console.log('temp team submitting:',req.body);
+        // console.log('temp team submitting:',req.body);
 
 
-        // await MatchService.addResult(match_id, result_data, user.team_id);
-        await MatchService.addResult(match_id, result_data, temp_team_1);
-        await MatchService.addResult(match_id, result_data, temp_team_2);
+        // await MatchService.addResult(match_id, result_data, temp_team_1);
+        // await MatchService.addResult(match_id, result_data, temp_team_2);
+
+
+        
+        // please uncomment below and comment above!!!
+
+        // check if user_id is a valid user (token has been verified)
+        var [user, fixture] = await Promise.all([User.findById(user_id), Match.findById(match_id)]);
+        if(user.team_id == null){
+            throw `Unauthorized to add this result`;
+        }
+        if(fixture.team_1.toString() != user.team_id.toString() && fixture.team_2.toString() != user.team_id.toString()){
+            throw `Unauthorized to add this result`;
+        }
+
+        
+
+
+        await MatchService.addResult(match_id, result_data, user.team_id);
         return res.status(200).json();
     }
     catch(e){

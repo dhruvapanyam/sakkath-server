@@ -102,7 +102,7 @@ class SwissDrawManager{
             // 1 v 6
             // 2 v 7, etc
         
-        const first_round_pair_offset = 5;
+        const first_round_pair_offset = 3;
         if(first_round && points_table.length >= 2*first_round_pair_offset){
             console.log('first round overriding!')
             var pairs = [];
