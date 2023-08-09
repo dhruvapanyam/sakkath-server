@@ -197,7 +197,7 @@ const beginNewSwissStage = async function(stage_data){
 
 
     var S = new SwissDrawManager();
-    var pairings = S.generateSwissPairings(stage_data.id, points_table, team_oppositions);
+    var pairings = S.generateSwissPairings(stage_data.division, points_table, team_oppositions);
     if(pairings == null) throw `Could not make Swiss Draw pairings!`
 
 
@@ -273,6 +273,21 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
     let team_ranks = {};
     for(let team of team_data) team_ranks[team._id] = team.stage_rank;
 
+
+    // FOR DAY 3 PROBLEM -- back to back for the 31v32 and 29v30 games ---- sort matches by maximum rank, and keep those first
+
+    if(stage_data?.stage_name === 'A-R6' || stage_data?.stage_name === 'B-R6'){
+        pairings.sort((pair1,pair2) => {
+            let max_rank1 = Math.max(team_ranks[pair1[0]],team_ranks[pair1[1]]);
+            let max_rank2 = Math.max(team_ranks[pair2[0]],team_ranks[pair2[1]]);
+
+            return max_rank2 - max_rank1;
+        })
+
+        console.log('team ranks:',team_ranks)
+        console.log('sorted pairs:',pairings);
+    }
+
     // IF SWISS:
 
     // check if any placeholder match is incompatible with a fixture pairing
@@ -280,7 +295,7 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
     // 2. sort pairings by latest slot played in
     // 3. assume that a compatible schedule is possible (it is)
 
-    if(stage_type == 'Swiss'){
+    else if(stage_type == 'Swiss'){
         let latest_match_played = {}
         let match_history = await Match.getByTeams(pairings.flat());
         match_history = match_history.filter(match => match.status == 'completed');
@@ -311,7 +326,7 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
 
     // sort in descending order of rank, keep top matches for the later slots
 
-    if(stage_type == 'Bracket'){
+    else if(stage_type == 'Bracket'){
         pairings.sort((pair1,pair2) => {
             let min_rank1 = Math.min(team_ranks[pair1[0]],team_ranks[pair1[1]]);
             let min_rank2 = Math.min(team_ranks[pair2[0]],team_ranks[pair2[1]]);
@@ -322,6 +337,8 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
         console.log('team ranks:',team_ranks)
         console.log('sorted pairs:',pairings);
     }
+
+    
 
     let promises = [];
     pairings.forEach((pair,i) => {
@@ -464,12 +481,13 @@ exports.sortSwissTable = async function(rows){
     team_data.forEach(team => {
         if(team._id in team_names == false) team_names[team._id] = team.team_name.toLowerCase();
     })
-    console.log(team_names)
+    // console.log(team_names)
 
     // dictionary of all teams defeated
     var defeated_opps = {};
     // console.log('rows:',rows)
     rows.forEach(row => {defeated_opps[row.team_id.toString()] = new Set()})
+
     group_matches.forEach(match => {
         if(match.status != 'completed') return;
         if(match.result.outcome == 'D') return;
@@ -486,9 +504,42 @@ exports.sortSwissTable = async function(rows){
     // for(let team in defeated_opps){
     //     team_names[team] = (await Team.findById(team))?.team_name;
     // }
-    // console.log('defeated opps');
-    // for(let team in team_names)
-    //     console.log(team_names[team], Array.from(defeated_opps[team]).map(t=>team_names[t]));
+
+    var can_use_head_to_head = new Set();
+
+    let points_list = Array.from(new Set(rows.map(row => row.points)));
+    for(let points_to_check of points_list){
+        try{
+            console.log('checking teams with points:',points_to_check);
+            let points_teams = rows.filter(row => row.points == points_to_check).map(row => row.team_id.toString());
+            let graph = {};
+            for(let team of points_teams){
+                graph[team] = new Set();
+            }
+            for(let team1 in graph){
+                for(let team2 in graph){
+                    if(defeated_opps[team1].has(team2)){
+                        graph[team1].add(team_names[team2]);
+                    }
+                }
+            }
+
+            let graph_names = {};
+            for(let team in graph){
+                graph_names[team_names[team]] = new Set(Array.from(graph[team]));
+            }
+
+            console.log(graph_names)
+            var cyclic = checkForCircularDependency(graph_names);
+
+            if(!cyclic) can_use_head_to_head.add(points_to_check);
+
+            
+        }
+        catch(e){
+            continue;
+        }
+    }
 
     // rows = rows
     //         .map(value => ({ value, sort: Math.random() }))
@@ -499,8 +550,11 @@ exports.sortSwissTable = async function(rows){
         if(r2.points > r1.points) return 1;
         if(r2.points < r1.points) return -1;
 
-        if(defeated_opps[r1.team_id].has(r2.team_id.toString())) return -1;
-        if(defeated_opps[r2.team_id].has(r1.team_id.toString())) return 1;
+        if(can_use_head_to_head.has(r1.points)){
+            if(defeated_opps[r1.team_id].has(r2.team_id.toString())) return -1;
+            if(defeated_opps[r2.team_id].has(r1.team_id.toString())) return 1;
+        }
+        
 
         if(r2.OPT > r1.OPT) return 1;
         if(r2.OPT < r1.OPT) return -1;
@@ -516,9 +570,74 @@ exports.sortSwissTable = async function(rows){
         return -1;
     })
 
-    console.log(rows.map(row => {return {rank:row.rank,name:team_names[row.team_id]}}));
+    // console.log(rows.map(row => {return {rank:row.rank,name:team_names[row.team_id]}}));
 
     return rows;
 
 
 }
+
+
+function checkForCircularDependency(adj){
+    // assume all team_names have same points in table
+    // if circular dependency found, then we cannot use head-to-head
+
+    console.log('checking for circular dependency')
+    var cyclic = isCyclic(adj)
+    console.log(cyclic);
+    return cyclic;
+
+}
+
+function isCyclic(adj)
+{
+    // Mark all the vertices as not visited and
+    // not part of recursion stack
+    let visited = {}
+    let recStack = {}
+    for(let team in adj)
+    {
+        visited[team]=false;
+        recStack[team]=false;
+    }
+        
+        
+    // Call the recursive helper function to
+    // detect cycle in different DFS trees
+    for (let team in adj){
+        // console.log('master --',team)
+        if (isCyclicUtil(team, visited, recStack, adj))
+            return true;
+    }
+
+    return false;
+}
+
+
+// Function to check if cycle exists
+function isCyclicUtil(team,visited,recStack, adj)
+{
+    // Mark the current node as visited and
+    // part of recursion stack
+    if (recStack[team])
+        return true;
+
+    if (visited[team])
+        return false;
+
+    // console.log('util --',team)
+            
+    visited[team] = true;
+
+    recStack[team] = true;
+    let children = Array.from(adj[team]);
+        
+    for (let c=0;c< children.length;c++)
+        if (isCyclicUtil(children[c],visited, recStack, adj))
+            return true;
+                
+    recStack[team] = false;
+
+    return false;
+}
+

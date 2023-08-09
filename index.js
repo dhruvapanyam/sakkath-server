@@ -53,7 +53,8 @@ const { isAdmin, verifyToken } = require('./middleware/auth_jwt');
 
 mongoose.connect(
     `mongodb+srv://dhruvapanyam16:dhruvapanyam@sakkath-db.ihmzxku.mongodb.net/?retryWrites=true&w=majority`,{
-        dbName: 'sakkath-demo'
+        dbName: 'sakkath-demo-1'
+        // dbName: 'test'
     }
 )
 .then(()=>{
@@ -62,39 +63,67 @@ mongoose.connect(
 
 // const team_details = require('./team_details/team_details.json')
 
+
+async function setup_new_database(){
+    // things to do:
+    // 1. add a tournament entry
+    // 2. time slots data
+    // 3. teams
+    // 4. users + admin
+
+    // 1. add a tournament
+    await Tournament.deleteMany();
+    await Tournament.create({
+        formats: {"Open":{}, "Women's":{}},
+        pools: {"Open":[],"Women's":[]}
+    })
+
+
+    // 2. add time slots
+    await Slot.deleteMany();
+    const default_slots = ['0630','0740','0850','1000','1110','1220','1330','1440','1550','1700'];
+    for(let i=0; i<30; i++){
+        await Slot.create({
+            timeslot_number: i,
+            start_time: default_slots[i%10]
+        });
+    }
+
+
+    // 3. add teams
+    await Team.deleteMany();
+    for(let team_data of team_details){
+        await Team.create(team_data);
+    }
+
+    // 4. add users
+    await User.deleteMany();
+    for(let team of await Team.find()){
+        let username = (team.team_code + team.division[0]).toLowerCase();
+        console.log(username)
+
+        await UserService.signup({
+            username,
+            password: username,
+            role: 'captain',
+            team_id: team._id
+        })
+    }
+
+    await UserService.signup({
+        username: 'admin',
+        password: 'admin',
+        role: 'admin'
+    })
+
+    
+}
+
 // --------------------------------------------------------------------------------
 async function run(){
 
-    // // create teams using team_details.json
-    // for(let team_data of team_details){
-    //     let team = await Team.create(team_data);
-    // }
-
-    // // delete all teams
-    // await Team.deleteMany();
-
-    // show all teams
-    // let teams = await Team.find();;
-    // console.log(teams)
-
-    // let timeslots = ['0630','0740','0850','1000','1110','1220','1330','1440','1550','1700']
-    // for(let i=0; i<30; i++){
-    //     await Slot.create({
-    //         timeslot_number: i,
-    //         start_time: timeslots[i%10]
-    //     })
-    // }
-
-    // for(let team of await Team.find()){
-    //     let username = (team.team_code + team.division[0]).toLowerCase();
-
-    //     await UserService.signup({
-    //         username,
-    //         password: username,
-    //         role: 'captain',
-    //         team_id: team._id
-    //     })
-    // }
+    // let stage = await Stage.findOne({stage_name: 'B-R6', division: 'Open'});
+    // await TournamentService.sortSwissTable([...stage.table]);
 
 
 }

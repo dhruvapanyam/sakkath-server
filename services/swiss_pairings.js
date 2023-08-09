@@ -31,6 +31,13 @@ class SwissDrawManager{
             edges.push(...(Object.keys(graph[node]).map(opp => [parseInt(node),parseInt(opp),graph[node][opp]])))
         }
         // console.log(edges)
+        // let shuffled = edges
+        //     .map(value => ({ value, sort: Math.random() }))
+        //     .sort((a, b) => a.sort - b.sort)
+        //     .map(({ value }) => value)
+        // return shuffled;
+
+
         return edges;
     }
 
@@ -54,7 +61,7 @@ class SwissDrawManager{
         }
     }
 
-    generateSwissPairings = (stage_id, points_table, team_history) => {
+    generateSwissPairings = (stage_division, points_table, team_history) => {
         console.log('generateSwissPairings');
         // format:
         //
@@ -73,6 +80,39 @@ class SwissDrawManager{
         this.graph_to_id = {};
 
         this.standings = {};
+
+        var first_round = (Object.values(team_history).filter(opponents => opponents.length > 0)).length === 0;
+        // If first round, then hard-code the fixtures as:
+            // 1 v 6
+            // 2 v 7, etc
+        
+        var first_round_pair_offset = 4;
+        if(stage_division == "Women's") first_round_pair_offset = 3;
+        
+        console.log('trying to override #teams:',points_table.length)
+        if(first_round && (points_table.length % (2*first_round_pair_offset)) == 0){
+            console.log('first round overriding!')
+            var pairs = [];
+            console.log(points_table.map(row => row.rank))
+            const num_teams = points_table.length;
+            for(let i=0; i<num_teams; i+=2*first_round_pair_offset){
+                for(let j=i; j<i+first_round_pair_offset; j++){
+                    console.log([points_table[j].rank, points_table[j+first_round_pair_offset].rank])
+                    console.log([points_table[j].team_id, points_table[j+first_round_pair_offset].team_id])
+                    pairs.push([points_table[j].team_id, points_table[j+first_round_pair_offset].team_id])
+                }
+            }
+
+            return pairs;
+        }
+
+        // shuffle points_table
+        points_table = points_table
+            .map(value => ({ value, sort: Math.random() }))
+            .sort((a, b) => a.sort - b.sort)
+            .map(({ value }) => value)
+
+
         points_table.forEach((team,i) => {
             this.standings[i] = {...team}
         })
@@ -97,27 +137,7 @@ class SwissDrawManager{
 
 
 
-        var first_round = (Object.values(team_history).filter(opponents => opponents.length > 0)).length === 0;
-        // If first round, then hard-code the fixtures as:
-            // 1 v 6
-            // 2 v 7, etc
         
-        const first_round_pair_offset = 3;
-        if(first_round && points_table.length >= 2*first_round_pair_offset){
-            console.log('first round overriding!')
-            var pairs = [];
-            console.log(points_table.map(row => row.rank))
-            const num_teams = points_table.length;
-            for(let i=0; i<num_teams; i+=2*first_round_pair_offset){
-                for(let j=i; j<i+first_round_pair_offset; j++){
-                    console.log([points_table[j].rank, points_table[j+first_round_pair_offset].rank])
-                    console.log([points_table[j].team_id, points_table[j+first_round_pair_offset].team_id])
-                    pairs.push([points_table[j].team_id, points_table[j+first_round_pair_offset].team_id])
-                }
-            }
-
-            return pairs;
-        }
 
         // Check if maximum cardinality matching exists (unweighted)
         const unweighted_graph = graph_edges.map(edge => [edge[0],edge[1],1]);
@@ -148,7 +168,7 @@ class SwissDrawManager{
             return unweighted_pairings.map(pair => pair.map(id => this.graph_to_id[id]));
         }
 
-        console.log('swiss:',stage_id,pairings)
+        // console.log('swiss:',stage_id,pairings)
         return pairings.map(pair => pair.map(id => this.graph_to_id[id]));
 
 
@@ -163,7 +183,7 @@ class SwissDrawManager{
         const teams_to_pair = [...scoregroups[score]];
         var score_graph_dict = {}
 
-        scoregroups[score].forEach(id => {
+        teams_to_pair.forEach(id => {
             this._addTeamToGraph(score_graph_dict, id);
         })
 

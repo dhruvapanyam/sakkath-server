@@ -59,6 +59,8 @@ exports.addResult = async function(req, res, next){
 
 
         await MatchService.addResult(match_id, result_data, user.team_id);
+
+
         return res.status(200).json();
     }
     catch(e){
