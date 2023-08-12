@@ -1,19 +1,15 @@
 TODO
 
-$$$$$$ 1. score submission -- corroborating, handling inconsistency
-$$$$$$ 2. login -- jwt tokens, pwd hash, middleware
-3. tournament settings -- schedule template
-4. schedule altering ?????
-5. results consistency -- can we delete a result and reload stuff ?????
+Add home button
+bypass rounds (rain)
+    schedule overview
+    view what score you submitted
+tournament complete status -- waiting for...
+round complete status
+    current round navigate
+    own team on left side
+    submit spirit button
 
-6. error handling ---- complete robustness
-7. client error handling
-8. client loading screens
+static pages !!
 
-9. UI
-
-
-10. hosting, test hosting
-
-
-11. edge weights!
+team page - roster view

@@ -70,6 +70,7 @@ async function setup_new_database(){
     // 2. time slots data
     // 3. teams
     // 4. users + admin
+    // 5. delete all stages, matches
 
     // 1. add a tournament
     await Tournament.deleteMany();
@@ -116,11 +117,18 @@ async function setup_new_database(){
         role: 'admin'
     })
 
+
+    // 5. delete all matches, stages
+    await Match.deleteMany();
+    await Stage.deleteMany();
+
     
 }
 
 // --------------------------------------------------------------------------------
 async function run(){
+
+    // setup_new_database();
 
     // let stage = await Stage.findOne({stage_name: 'B-R6', division: 'Open'});
     // await TournamentService.sortSwissTable([...stage.table]);
