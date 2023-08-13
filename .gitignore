@@ -1,3 +1,5 @@
 node_modules/
 team_details/
 server.zip
+certificate.crt
+private.key

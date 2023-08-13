@@ -1,4 +1,3 @@
-
 const app = require('express')();
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -7,6 +6,15 @@ app.use(bodyParser.json());
 const cors = require('cors')
 app.use(cors())
 
+const fs = require('fs');
+const cert = fs.readFileSync('./certificate.crt');
+const key = fs.readFileSync('./private.key');
+
+const creds = {key, cert};
+
+const https = require('https');
+const httpsServer = https.createServer(creds, app);
+httpsServer.listen(8443);
 
 app.use(function(req, res, next) {
     res.header(
@@ -315,10 +323,4 @@ app.get('/mvps', async (req, res) => {
 
 app.get('/health', (req, res) => {
     return res.status(200).send();
-})
-
-
-
-app.get('/.well-known/pki-validation/AA797F4C71FE7AD4FD2CEA57739573D8.txt', (req, res) => {
-    res.sendFile('/home/ec2-user/sakkath-server/AA797F4C71FE7AD4FD2CEA57739573D8.txt');
 })
