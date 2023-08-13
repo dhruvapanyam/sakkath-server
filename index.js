@@ -316,3 +316,9 @@ app.get('/mvps', async (req, res) => {
 app.get('/health', (req, res) => {
     return res.status(200).send();
 })
+
+
+
+app.get('/.well-known/pki-validation/AA797F4C71FE7AD4FD2CEA57739573D8.txt', (req, res) => {
+    res.sendFile('/home/ec2-user/sakkath-server/AA797F4C71FE7AD4FD2CEA57739573D8.txt');
+})
