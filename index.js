@@ -12,10 +12,6 @@ const key = fs.readFileSync('./private.key');
 
 const creds = {key, cert};
 
-const https = require('https');
-const httpsServer = https.createServer(creds, app);
-httpsServer.listen(8443);
-
 app.use(function(req, res, next) {
     res.header(
         "Access-Control-Allow-Headers",
@@ -324,3 +320,11 @@ app.get('/mvps', async (req, res) => {
 app.get('/health', (req, res) => {
     return res.status(200).send();
 })
+
+
+
+
+
+const https = require('https');
+const httpsServer = https.createServer(creds, app);
+httpsServer.listen(8443);
