@@ -160,7 +160,7 @@ exports.addResult = async function(id, result, team_id_submitting){
 
     // begin new stage
     await TournamentService.beginNewStage(next_stage);
-
+    
 }
 
 

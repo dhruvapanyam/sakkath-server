@@ -7,15 +7,6 @@ app.use(bodyParser.json());
 const cors = require('cors')
 app.use(cors())
 
-const cookieSession = require('cookie-session');
-
-app.use(
-    cookieSession({
-        name: "sakkath-session",
-        keys: ["COOKIE_SECRET"], // should use as secret environment variable
-        httpOnly: true,
-    })
-);
 
 app.use(function(req, res, next) {
     res.header(
@@ -25,7 +16,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-const PORT = process.env.PORT || 4040;
+const PORT = process.env.PORT || 80;
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`)
 });
