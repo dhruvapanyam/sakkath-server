@@ -327,4 +327,4 @@ app.get('/health', (req, res) => {
 
 const https = require('https');
 const httpsServer = https.createServer(creds, app);
-httpsServer.listen(8443);
+httpsServer.listen(443);
