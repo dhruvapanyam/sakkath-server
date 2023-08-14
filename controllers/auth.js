@@ -60,7 +60,6 @@ exports.signin = async function(req, res, next){
 
 exports.signout = async (req, res) => {
     try {
-        req.session = null;
         return res.status(200).json({
             message: "You've been signed out!"
         });
