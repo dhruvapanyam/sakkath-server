@@ -7,37 +7,55 @@ const MatchService = require('./matches');
 
 exports.getStagesInfo = async function(){
     // get standings & results
-    var promises = [Stage.find(), Team.find()];
-    var [stages, teams] = await Promise.all(promises);
+    var promises = [
+        Stage.find(), 
+        Team.find(), 
+        Match.find().populate("team_1", "team_name logo").populate("team_2", "team_name logo").populate("stage", "division pool stage_name")
+    ];
+    var [stages, teams, matches] = await Promise.all(promises);
     // var stages = [...(await Stage.find())];
     var res = {"Open": {}, "Women's": {}};
     // console.log('1')
 
-    stages.sort((s1,s2) => (s1.stage_name > s2.stage_name) ? 1 : -1)
-    // console.log(stages.map(s => s.stage_name))
+    var stage_dict = {}
+    stages.forEach(stage => {
+        stage_dict[stage._id.toString()] = stage;
+    })
+
+    matches = await MatchService.getMatchTimings(matches);
+
+    matches.forEach((match,i) => {
+        let stage = stage_dict[match.stage._id.toString()];
+        // console.log(stage.division, stage.pool)
+        if(stage.pool in res[stage.division] == false) res[stage.division][stage.pool] = {};
+        if(stage.stage_name in res[stage.division][stage.pool] == false) res[stage.division][stage.pool][stage.stage_name] = {info: stage, fixtures:[]}
+
+        res[stage.division][stage.pool][stage.stage_name].fixtures.push(match);
+    })
     
-    promises = [];
-    for(let stage of stages){
-        // console.log('stage.id:',stage.id)
-        promises.push(Match.getByStage(stage.id));
-    }
+    // promises = [];
+    // for(let stage of stages){
+    //     // console.log('stage.id:',stage.id)
+    //     promises.push(Match.getByStage(stage.id));
+    // }
     
-    var fixture_sets = await Promise.all(promises);
-    fixture_sets = await Promise.all(fixture_sets.map(fixs => {
-        return MatchService.getMatchTimings(fixs.filter(fix => fix.status != 'placeholder'));
-    }))
+    // var fixture_sets = await Promise.all(promises);
+    // fixture_sets = await Promise.all(fixture_sets.map(fixs => {
+    //     return MatchService.getMatchTimings(fixs.filter(fix => fix.status != 'placeholder'));
+    // }))
     // console.log('2')
-    for(let i=0; i<stages.length; i++){
-        let stage = stages[i]
-        if(stage.pool in res[stage.division] == false) res[stage.division][stage.pool] = {}
+    // for(let i=0; i<stages.length; i++){
+    //     let stage = stages[i]
+    //     if(stage.pool in res[stage.division] == false) res[stage.division][stage.pool] = {}
+    // }
 
-        let fixs = fixture_sets[i]
+    //     let fixs = fixture_sets[i]
 
-        res[stage.division][stage.pool][stage.stage_name] = {
-            info: stage,
-            fixtures: fixs
-        }
-    };
+    //     res[stage.division][stage.pool][stage.stage_name] = {
+    //         info: stage,
+    //         fixtures: fixs
+    //     }
+
     // console.log('3')
 
     return {

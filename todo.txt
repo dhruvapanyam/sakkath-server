@@ -1,15 +1,12 @@
 TODO
 
-Add home button
-bypass rounds (rain)
-    schedule overview
-    view what score you submitted
-tournament complete status -- waiting for...
-round complete status
-    current round navigate
-    own team on left side
-    submit spirit button
+rules
 
-static pages !!
 
-team page - roster view
+
+backend
+____
+1. placeholder sort
+2. optimize functions
+3. data transfer (?)
+4. round bypass (?)

@@ -41,7 +41,7 @@ exports.signin = async function(req, res, next){
             });
 
         // console.log('hi')
-        req.session.token = token;
+        // req.session.token = token;
         return res.status(200).json({
             id: user.id,
             username: user.username,
@@ -52,6 +52,7 @@ exports.signin = async function(req, res, next){
           });
     }
     catch(e){
+        console.log(e)
         return res.status(400).json({status: 400, message: e});
     }
 }
