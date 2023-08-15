@@ -3,7 +3,7 @@ const config = require("../config/auth.config");
 const User = require("../models/users");
 
 verifyToken = (req, res, next) => {
-    let token = req.session.token || req.body.token || req.header('x-auth-token');
+    let token = req.body.token || req.header('x-auth-token');
 
     if (!token) {
         return res.status(400).json({

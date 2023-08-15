@@ -10,3 +10,4 @@ ____
 2. optimize functions
 3. data transfer (?)
 4. round bypass (?)
+5. spirit scoring

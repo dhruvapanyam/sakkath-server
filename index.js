@@ -48,7 +48,7 @@ const { isAdmin, verifyToken } = require('./middleware/auth_jwt');
 
 mongoose.connect(
     `mongodb+srv://dhruvapanyam16:dhruvapanyam@sakkath-db.ihmzxku.mongodb.net/?retryWrites=true&w=majority`,{
-        dbName: 'sakkath-demo'
+        dbName: 'sakkath-official'
         // dbName: 'test'
     }
 )

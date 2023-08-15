@@ -172,17 +172,16 @@ exports.addSpiritScore = async function(id, spirit, team_id_submitting){
     // console.log('adding')
 
     console.log('received:',spirit)
+    // return;
 
     if(team_id_submitting == match.team_1.toString()){
-        match.spirit.spirit_score_2 = spirit.spirit_score_2;
-        match.spirit.self_spirit_score_1 = spirit.spirit_score_1;
+        match.spirit.spirit_score_2 = spirit.spirit_score;
         match.spirit.comments_2 = spirit.comments;
         match.spirit.mvp_2 = spirit.mvp;
         match.spirit.msp_2 = spirit.msp;
     }
     else if(team_id_submitting == match.team_2.toString()){
-        match.spirit.self_spirit_score_2 = spirit.spirit_score_2;
-        match.spirit.spirit_score_1 = spirit.spirit_score_1;
+        match.spirit.spirit_score_1 = spirit.spirit_score;
         match.spirit.comments_1 = spirit.comments;
         match.spirit.mvp_1 = spirit.mvp;
         match.spirit.msp_1 = spirit.msp;
