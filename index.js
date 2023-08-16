@@ -6,11 +6,11 @@ app.use(bodyParser.json());
 const cors = require('cors')
 app.use(cors())
 
-// const fs = require('fs');
-// const cert = fs.readFileSync('./certificate.crt');
-// const key = fs.readFileSync('./private.key');
+const fs = require('fs');
+const cert = fs.readFileSync('./certificate.crt');
+const key = fs.readFileSync('./private.key');
 
-// const creds = {key, cert};
+const creds = {key, cert};
 
 app.use(function(req, res, next) {
     res.header(
@@ -326,6 +326,6 @@ app.get('/health', (req, res) => {
 
 
 
-// const https = require('https');
-// const httpsServer = https.createServer(creds, app);
-// httpsServer.listen(443);
+const https = require('https');
+const httpsServer = https.createServer(creds, app);
+httpsServer.listen(443);
