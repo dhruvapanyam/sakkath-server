@@ -56,7 +56,7 @@ mongoose.connect(
     console.log('connected to the DB!')
 })
 
-const team_details = require('./team_details/team_details.json')
+// const team_details = require('./team_details/team_details.json')
 
 
 async function setup_new_database(){
@@ -123,7 +123,7 @@ async function setup_new_database(){
 // --------------------------------------------------------------------------------
 async function run(){
 
-    setup_new_database();
+    // setup_new_database();
 
     // let stage = await Stage.findOne({stage_name: 'B-R6', division: 'Open'});
     // await TournamentService.sortSwissTable([...stage.table]);
