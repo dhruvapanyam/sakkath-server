@@ -8,6 +8,7 @@ backend
 ____
 1. placeholder sort
 2. optimize functions
-3. data transfer (?)
+3. beanstalk config (?)
 4. round bypass (?)
 5. spirit scoring
+6. data backups!

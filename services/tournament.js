@@ -562,7 +562,9 @@ exports.sortSwissTable = async function(rows){
         if(r2.GD > r1.GD) return 1;
         if(r2.GD < r1.GD) return -1;
 
-        console.log('sorting by name');
+        console.log('sorting randomly');
+
+        return Math.random()>0.5 ? 1 : -1;
 
         if(team_names[r1.team_id] > team_names[r2.team_id]) return 1;
         if(team_names[r1.team_id] < team_names[r2.team_id]) return -1;

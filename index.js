@@ -6,11 +6,11 @@ app.use(bodyParser.json());
 const cors = require('cors')
 app.use(cors())
 
-const fs = require('fs');
-const cert = fs.readFileSync('./certificate.crt');
-const key = fs.readFileSync('./private.key');
+// const fs = require('fs');
+// const cert = fs.readFileSync('./certificate.crt');
+// const key = fs.readFileSync('./private.key');
 
-const creds = {key, cert};
+// const creds = {key, cert};
 
 app.use(function(req, res, next) {
     res.header(
@@ -20,7 +20,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 4040;
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`)
 });
@@ -48,7 +48,7 @@ const { isAdmin, verifyToken } = require('./middleware/auth_jwt');
 
 mongoose.connect(
     `mongodb+srv://dhruvapanyam16:dhruvapanyam@sakkath-db.ihmzxku.mongodb.net/?retryWrites=true&w=majority`,{
-        dbName: 'sakkath-official'
+        dbName: 'sakkath-final-demo'
         // dbName: 'test'
     }
 )
@@ -56,7 +56,7 @@ mongoose.connect(
     console.log('connected to the DB!')
 })
 
-// const team_details = require('./team_details/team_details.json')
+const team_details = require('./team_details/team_details.json')
 
 
 async function setup_new_database(){
@@ -123,10 +123,11 @@ async function setup_new_database(){
 // --------------------------------------------------------------------------------
 async function run(){
 
-    // setup_new_database();
+    setup_new_database();
 
     // let stage = await Stage.findOne({stage_name: 'B-R6', division: 'Open'});
     // await TournamentService.sortSwissTable([...stage.table]);
+
 
 
 }
@@ -325,6 +326,6 @@ app.get('/health', (req, res) => {
 
 
 
-const https = require('https');
-const httpsServer = https.createServer(creds, app);
-httpsServer.listen(443);
+// const https = require('https');
+// const httpsServer = https.createServer(creds, app);
+// httpsServer.listen(443);

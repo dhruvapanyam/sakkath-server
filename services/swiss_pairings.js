@@ -62,7 +62,7 @@ class SwissDrawManager{
     }
 
     generateSwissPairings = (stage_division, points_table, team_history) => {
-        console.log('generateSwissPairings');
+        // console.log('generateSwissPairings');
         // format:
         //
         // points_table: [{rank,team_id,played,won,lost,points,GD,AOR,AOS,OPT,OMW},]
@@ -89,16 +89,16 @@ class SwissDrawManager{
         var first_round_pair_offset = 4;
         if(stage_division == "Women's") first_round_pair_offset = 3;
         
-        console.log('trying to override #teams:',points_table.length)
+        // console.log('trying to override #teams:',points_table.length)
         if(first_round && (points_table.length % (2*first_round_pair_offset)) == 0){
-            console.log('first round overriding!')
+            // console.log('first round overriding!')
             var pairs = [];
-            console.log(points_table.map(row => row.rank))
+            // console.log(points_table.map(row => row.rank))
             const num_teams = points_table.length;
             for(let i=0; i<num_teams; i+=2*first_round_pair_offset){
                 for(let j=i; j<i+first_round_pair_offset; j++){
-                    console.log([points_table[j].rank, points_table[j+first_round_pair_offset].rank])
-                    console.log([points_table[j].team_id, points_table[j+first_round_pair_offset].team_id])
+                    // console.log([points_table[j].rank, points_table[j+first_round_pair_offset].rank])
+                    // console.log([points_table[j].team_id, points_table[j+first_round_pair_offset].team_id])
                     pairs.push([points_table[j].team_id, points_table[j+first_round_pair_offset].team_id])
                 }
             }
