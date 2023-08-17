@@ -132,6 +132,10 @@ const getPoolTeamIds = async function(pool_data){
 
 const beginNewStage = async function(stage_data){
     console.log('beginNewStage');
+    if(stage_data.status == 'live'){
+        console.log('cannot begin already live stage');
+        return;
+    }
     stage_data.status = 'live';
     await stage_data.save();
     // console.log(stage_data.type)
@@ -339,6 +343,13 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
     }
 
     
+    // console.log(placeholders)
+    // console.log('PLACEHOLDERS ^^^')
+
+    try{
+        placeholders.sort((m1,m2) => m1.match_number - m2.match_number);
+    }
+    catch(e){}
 
     let promises = [];
     pairings.forEach((pair,i) => {

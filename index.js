@@ -130,6 +130,7 @@ async function run(){
 
 
 
+
 }
 run();
 // --------------------------------------------------------------------------------
@@ -294,21 +295,128 @@ app.post('/timeslots_change', verifyToken, isAdmin, async (req, res) => {
     }
 })
 
-
-
 // app.get('/mvps', verifyToken, isAdmin, async (req, res) => {
-app.get('/mvps', async (req, res) => {
-    try{
-        let matches = await Match.find().where('status').equals('completed').select('team_1 team_2 spirit.mvp_1 spirit.mvp_2').populate('team_1','team_name division').populate('team_2','team_name division')
-        let team_mvps = {}
-        matches.forEach(match => {
-            if(match.team_1._id in team_mvps == false) team_mvps[match.team_1._id] = {team_name: match.team_1.team_name, division: match.team_1.division, mvps:[]};
-            if(match.team_2._id in team_mvps == false) team_mvps[match.team_2._id] = {team_name: match.team_2.team_name, division: match.team_2.division, mvps:[]};
+    app.get('/mvps', async (req, res) => {
+        try{
+            let matches = await Match.find().where('status').equals('completed').select('team_1 team_2 spirit.mvp_1 spirit.mvp_2').populate('team_1','team_name division').populate('team_2','team_name division')
+            let team_mvps = {}
+            matches.forEach(match => {
+                if(match.team_1._id in team_mvps == false) team_mvps[match.team_1._id] = {team_name: match.team_1.team_name, division: match.team_1.division, mvps:[]};
+                if(match.team_2._id in team_mvps == false) team_mvps[match.team_2._id] = {team_name: match.team_2.team_name, division: match.team_2.division, mvps:[]};
+        
+                team_mvps[match.team_1._id].mvps.push(match.spirit?.mvp_1);
+                team_mvps[match.team_2._id].mvps.push(match.spirit?.mvp_2);
+            })
+
+            let results = {'Open': [], "Women's": []}
+            for(let team in team_mvps){
+                let team_data = await Team.findById(team).select('stage_rank');
+                team_mvps[team].rank = team_data.stage_rank;
+                team_mvps[team].mvps.sort();
+                const counts = {};
+                const sampleArray = [...team_mvps[team].mvps];
+                sampleArray.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+                let sorted_counts = Object.keys(counts).map(player => [player, counts[player]])
+                sorted_counts.sort((p1,p2) => p1[1] - p2[1])
+                // if(counts["undefined"]) delete counts["undefined"]
+
+                results[team_mvps[team].division].push({
+                    team_name: team_mvps[team].team_name,
+                    rank: team_mvps[team].rank,
+                    players: counts
+                })
+            }
+
+            results.Open.sort((t1,t2) => t1.rank - t2.rank)
+            results['Women\'s'].sort((t1,t2) => t1.rank - t2.rank)
+
+
+
+            return res.type('json').send(JSON.stringify(results, null, 2) + '\n');
+        }
+        catch(e){
+            console.log(e)
+            res.status(500).json({message:e});
+        }
+    })
     
-            team_mvps[match.team_1._id].mvps.push(match.spirit?.mvp_1);
-            team_mvps[match.team_2._id].mvps.push(match.spirit?.mvp_2);
+
+// app.get('/msps', verifyToken, isAdmin, async (req, res) => {
+    app.get('/msps', async (req, res) => {
+        try{
+            let matches = await Match.find().where('status').equals('completed').select('team_1 team_2 spirit.msp_1 spirit.msp_2').populate('team_1','team_name division').populate('team_2','team_name division')
+            let team_msps = {}
+            matches.forEach(match => {
+                if(match.team_1._id in team_msps == false) team_msps[match.team_1._id] = {team_name: match.team_1.team_name, division: match.team_1.division, msps:[]};
+                if(match.team_2._id in team_msps == false) team_msps[match.team_2._id] = {team_name: match.team_2.team_name, division: match.team_2.division, msps:[]};
+        
+                team_msps[match.team_1._id].msps.push(match.spirit?.msp_1);
+                team_msps[match.team_2._id].msps.push(match.spirit?.msp_2);
+            })
+
+            let results = {'Open': [], "Women's": []}
+            for(let team in team_msps){
+                let team_data = await Team.findById(team).select('stage_rank');
+                team_msps[team].rank = team_data.stage_rank;
+                const counts = {};
+                const sampleArray = [...team_msps[team].msps];
+                sampleArray.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+                // if(counts["undefined"]) delete counts["undefined"]
+
+                results[team_msps[team].division].push({
+                    team_name: team_msps[team].team_name,
+                    rank: team_msps[team].rank,
+                    players: counts
+                })
+            }
+
+            results.Open.sort((t1,t2) => t1.rank - t2.rank)
+            results['Women\'s'].sort((t1,t2) => t1.rank - t2.rank)
+
+
+            return res.type('json').send(JSON.stringify(results, null, 2) + '\n');
+        }
+        catch(e){
+            console.log(e)
+            res.status(500).json({message:e});
+        }
+    })
+    
+    
+
+// app.get('/msps', verifyToken, isAdmin, async (req, res) => {
+app.get('/spirit_ranking', async (req, res) => {
+    try{
+        let matches = await Match.find().where('status').equals('completed').select('team_1 team_2 spirit.spirit_score_1 spirit.spirit_score_2').populate('team_1','team_name division').populate('team_2','team_name division')
+        let team_spirit = {}
+        matches.forEach(match => {
+            if(match.team_1._id in team_spirit == false) team_spirit[match.team_1._id] = {team_name: match.team_1.team_name, division: match.team_1.division, spirit:[0,0]};
+            if(match.team_2._id in team_spirit == false) team_spirit[match.team_2._id] = {team_name: match.team_2.team_name, division: match.team_2.division, spirit:[0,0]};
+
+
+    
+            team_spirit[match.team_1._id].spirit[0] += (match.spirit?.spirit_score_1 || []).reduce((partial, a) => partial + a, 0);;
+            team_spirit[match.team_2._id].spirit[0] += (match.spirit?.spirit_score_2 || []).reduce((partial, a) => partial + a, 0);;
+            if(match.spirit?.spirit_score_1.length) team_spirit[match.team_1._id].spirit[1] += 1
+            if(match.spirit?.spirit_score_2.length) team_spirit[match.team_2._id].spirit[1] += 1
         })
-        return res.json(team_mvps);
+
+        let results = {'Open': [], "Women's": []}
+        for(let team in team_spirit){
+            let team_data = await Team.findById(team).select('stage_rank');
+            team_spirit[team].rank = team_data.stage_rank;
+            results[team_spirit[team].division].push({
+                team_name: team_spirit[team].team_name,
+                rank: team_spirit[team].rank,
+                spirit: team_spirit[team].spirit[1] ? team_spirit[team].spirit[0] / team_spirit[team].spirit[1] : 0
+            })
+        }
+
+        results.Open.sort((t1,t2) => t2.spirit - t1.spirit)
+        results['Women\'s'].sort((t1,t2) => t2.spirit - t1.spirit)
+
+
+        return res.type('json').send(JSON.stringify(results, null, 2) + '\n');
     }
     catch(e){
         console.log(e)
@@ -316,6 +424,38 @@ app.get('/mvps', async (req, res) => {
     }
 })
 
+    
+
+
+app.get('/spirit_pending', async (req, res) => {
+    try{
+        let matches = await Match.find({status: 'completed'})
+                                .populate('team_1', 'team_name')
+                                .populate('team_2', 'team_name')
+                                .select('team_1 team_2 match_number spirit.spirit_score_1 spirit.spirit_score_2');
+        
+        let pending = matches.filter(match => match.spirit.spirit_score_1.length + match.spirit.spirit_score_2.length < 20);
+
+        var response = pending.map(match => {
+            return {
+                match_number: match.match_number,
+                team_1: match.team_1.team_name,
+                team_2: match.team_2.team_name,
+                team_1_submitted: (match.spirit.spirit_score_2.length == 10),
+                team_2_submitted: (match.spirit.spirit_score_1.length == 10),
+            }
+        })
+
+        return res.status(200).json(response)
+
+    }
+    catch(e){
+        console.log(e);
+        return res.status(400).json();
+    }
+})
+    
+    
 
 
 app.get('/health', (req, res) => {

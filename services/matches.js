@@ -106,6 +106,11 @@ exports.addResult = async function(id, result, team_id_submitting){
     if(Object.keys(match).length == 0) throw `Could not find match id!`;
     // console.log('adding')
 
+    if(match.status == "completed"){
+        console.log('cannot add result to completed match!');
+        return;
+    }
+
     await handleScoreSubmission(match, result, team_id_submitting);
 
     if(match.status != "completed"){
