@@ -17,7 +17,7 @@ verifyToken = (req, res, next) => {
         config.secret,
         (err, decoded) => {
             if (err) {
-                console.log('err auth token',err.name)
+                // console.log('err auth token',err.name)
                 return res.status(400).json({
                     token_err: true,
                     expired: err.name == 'TokenExpiredError',  

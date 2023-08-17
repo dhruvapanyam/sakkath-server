@@ -288,8 +288,9 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
             return max_rank2 - max_rank1;
         })
 
-        console.log('team ranks:',team_ranks)
-        console.log('sorted pairs:',pairings);
+        // console.log('team ranks:',team_ranks)
+        // console.log('sorted pairs:',pairings);
+        console.log('sorting by max rank -- day 3');
     }
 
     // IF SWISS:
@@ -313,7 +314,7 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
             latest_match_played[team_id] = latest;
         }
 
-        console.log('latest matches played:',latest_match_played)
+        // console.log('latest matches played:',latest_match_played)
 
         pairings.sort((pair1,pair2) => {
             let latest1 = Math.max(latest_match_played[pair1[0]],latest_match_played[pair1[1]]);
@@ -322,7 +323,8 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
             return latest1 - latest2;
         })
 
-        console.log('sorted pairs:',pairings)
+        // console.log('sorted pairs:',pairings)
+        console.log('sorting by earliest played -- swiss');
     }
 
 
@@ -338,8 +340,9 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
             return min_rank2 - min_rank1;
         })
 
-        console.log('team ranks:',team_ranks)
-        console.log('sorted pairs:',pairings);
+        // console.log('team ranks:',team_ranks)
+        // console.log('sorted pairs:',pairings);
+        console.log('sorting by min rank -- bracket');
     }
 
     
@@ -348,6 +351,7 @@ const addStageFixtures = async function(stage_data, pairings, stage_type='Swiss'
 
     try{
         placeholders.sort((m1,m2) => m1.match_number - m2.match_number);
+        console.log('sorted placeholders by match_number')
     }
     catch(e){}
 
@@ -540,7 +544,7 @@ exports.sortSwissTable = async function(rows){
                 graph_names[team_names[team]] = new Set(Array.from(graph[team]));
             }
 
-            console.log(graph_names)
+            // console.log(graph_names)
             var cyclic = checkForCircularDependency(graph_names);
 
             if(!cyclic) can_use_head_to_head.add(points_to_check);

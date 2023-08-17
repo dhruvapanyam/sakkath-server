@@ -38,7 +38,7 @@ exports.getTeamInfo = async function(req, res, next){
                     own_team = (user?.team_id == id);
                 }
                 else{
-                    console.log('token team info error:',err?.name)
+                    // console.log('token team info error:',err?.name)
                 }
                 return res.status(200).json({...info, own_team});
             }
