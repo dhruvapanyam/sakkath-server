@@ -4,3 +4,4 @@ server.zip
 certificate.crt
 private.key
 simulations.js
+db_saves/

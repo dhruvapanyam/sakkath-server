@@ -46,9 +46,11 @@ const authJwt = require('./middleware/auth_jwt');
 const TournamentService = require('./services/tournament');
 const { isAdmin, verifyToken } = require('./middleware/auth_jwt');
 
+const DB_NAME = 'sakkath-final-demo'
+
 mongoose.connect(
     `mongodb+srv://dhruvapanyam16:dhruvapanyam@sakkath-db.ihmzxku.mongodb.net/?retryWrites=true&w=majority`,{
-        dbName: 'sakkath-final-demo'
+        dbName: DB_NAME
         // dbName: 'test'
     }
 )
@@ -120,17 +122,171 @@ async function setup_new_database(){
     
 }
 
+async function save_database_json(){
+    let teams = await Team.find();
+    let stages = await Stage.find();
+    let matches = await Match.find();
+    let users = await User.find();
+    let tournaments = await Tournament.find();
+    let timeslots = await Slot.find();
+
+    var json = {
+        teams, stages, matches, users, timeslots, tournaments
+    }
+    let now = Date.now().toString();
+    fs.writeFile(`./db_saves/${DB_NAME}_${now}.json`, JSON.stringify(json), 'utf8', ()=>{
+        console.log('saved db to file!')
+    });
+}
+
+async function load_database_json(filename){
+    var db_data = fs.readFileSync('./db_saves/'+filename);
+    db_data = JSON.parse(db_data)
+    // console.log(db_data?.teams?.length)
+
+    var team_map = {};
+    var match_map = {};
+    var stage_map = {};
+    var new_teams = [], new_matches = [], new_stages = [], new_users = [], new_slots = [], new_tournaments = [];
+    for(let team of db_data.teams){
+        let new_team = {...team};
+        delete new_team._id;
+
+        let created_team = new Team(new_team);
+        team_map[team._id] = created_team._id.toString();
+        new_teams.push(created_team)
+    }
+    for(let match of db_data.matches){
+        let new_match = {...match};
+        delete new_match._id;
+
+        let created_match = new Match(new_match);
+        match_map[match._id] = created_match._id.toString();
+        new_matches.push(created_match)
+    }
+    for(let stage of db_data.stages){
+        let new_stage = {...stage};
+        delete new_stage._id;
+
+        let created_stage = new Stage(new_stage);
+        stage_map[stage._id] = created_stage._id.toString();
+        new_stages.push(created_stage)
+    }
+    for(let user of db_data.users){
+        let new_user = {...user};
+        delete new_user._id;
+
+        let created_user = new User(new_user);
+        new_users.push(created_user)
+    }
+    for(let slot of db_data.timeslots){
+        let new_slot = {...slot};
+        delete new_slot._id;
+
+        let created_slot = new Slot(new_slot);
+        new_slots.push(created_slot)
+    }
+    for(let tournament of db_data.tournaments){
+        let new_tournament = {...tournament};
+        delete new_tournament._id;
+
+        let created_tournament = new Tournament(new_tournament);
+        new_tournaments.push(created_tournament)
+    }
+    // console.log(new_stages.length);
+    // update teams' current stage id and upcoming match id (deprec)
+    for(let i=0; i<new_teams.length; i++){
+        let old_stage = new_teams[i].current_stage_id;
+        let old_upcoming = new_teams[i].upcoming_match_id;
+
+        let new_stage = stage_map[old_stage];
+        let new_upcoming = match_map[old_upcoming];
+
+        new_teams[i].current_stage_id = new_stage;
+        new_teams[i].upcoming_match_id = new_upcoming;
+    }
+
+    // update matches' team1 team2 stage
+    for(let i=0; i<new_matches.length; i++){
+        let old_stage = new_matches[i].stage;
+        let old_team1 = new_matches[i].team_1;
+        let old_team2 = new_matches[i].team_2;
+
+        let new_stage = stage_map[old_stage];
+        let new_team1 = team_map[old_team1];
+        let new_team2 = team_map[old_team2];
+
+        new_matches[i].stage = new_stage;
+        new_matches[i].team_1 = new_team1;
+        new_matches[i].team_2 = new_team2;
+    }
+
+    // update stages' tables
+    for(let i=0; i<new_stages.length; i++){
+        for(let j=0; j<new_stages[i].table.length; j++){
+            let old_team = new_stages[i].table[j].team_id;
+            let new_team = team_map[old_team];
+            new_stages[i].table[j].team_id = new_team;
+        }
+    }
+
+    // update users' team_id
+    for(let i=0; i<new_matches.length; i++){
+
+        let old_team = new_matches[i].team_id;
+
+        let new_team = team_map[old_team];
+
+        new_matches[i].team_id = new_team;
+    }
+
+
+    await save_database_json();
+
+
+    await Team.deleteMany();
+    await Match.deleteMany();
+    await Stage.deleteMany();
+    await User.deleteMany();
+    await Slot.deleteMany();
+    await Tournament.deleteMany();
+
+    var promises = [];
+    for(x of new_teams) promises.push(x.save());
+    for(x of new_matches) promises.push(x.save());
+    for(x of new_stages) promises.push(x.save());
+    for(x of new_slots) promises.push(x.save());
+    for(x of new_tournaments) promises.push(x.save());
+
+    for(let team of new_teams){
+        let username = (team.team_code + team.division[0]).toLowerCase();
+        console.log(username)
+
+        await UserService.signup({
+            username,
+            password: username,
+            role: 'captain',
+            team_id: team._id
+        })
+    }
+
+    await UserService.signup({
+        username: 'admin',
+        password: 'admin',
+        role: 'admin'
+    })
+
+    await Promise.all(promises);
+
+    console.log('done loading')
+}
+
 // --------------------------------------------------------------------------------
 async function run(){
 
     // setup_new_database();
-
-    // let stage = await Stage.findOne({stage_name: 'B-R6', division: 'Open'});
-    // await TournamentService.sortSwissTable([...stage.table]);
-
-
-
-
+    // save_database_json();
+    // load_database_json('sakkath-demo-1_1692251231599.json')
 }
 run();
 // --------------------------------------------------------------------------------

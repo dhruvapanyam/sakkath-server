@@ -10,5 +10,5 @@ ____
     4. round bypass (?)
     5. spirit scoring
 6. data backups!
-7. swiss failure default pairings
-8. mvp details
+    7. swiss failure default pairings
+    8. mvp details

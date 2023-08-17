@@ -146,9 +146,17 @@ class SwissDrawManager{
         if(unweighted_pairings.length < Math.round(10*points_table.length / 2)/10){
             console.log('Maximum matching not possible!')
 
-            return null;
-            // idk what to do then
-            // return;
+            // very worst case
+            // return 1v2, 3v4
+
+            let ranked = [...points_table];
+            ranked.sort((t1,t2) => t1.rank - t2.rank);
+            let pairs = []
+            for(let i=0; i+1<ranked.length; i++){
+                pairs.push([ranked[i].team_id, ranked[i+1].team_id])
+            }
+
+            return pairs;
         }
 
         var scoregroups = {};
