@@ -10,7 +10,7 @@ exports.signup = async function(req, res, next){
         return res.status(200).json({message: 'Successfully registered!'});
     }
     catch(e){
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 }
 
@@ -21,7 +21,7 @@ exports.signin = async function(req, res, next){
         
         const users = await User.find({username:req.body.username}).populate("team_id", "team_name logo");
         if (users.length === 0) {
-            return res.status(400).json({ message: "User Not found." });
+            return res.status(500).json({ message: "User Not found." });
         }
         const user = users[0];
 
@@ -53,7 +53,7 @@ exports.signin = async function(req, res, next){
     }
     catch(e){
         console.log(e)
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 }
 

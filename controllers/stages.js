@@ -8,7 +8,7 @@ exports.addStage = async function(req, res, next){
         return res.status(200).json(stage);
     }
     catch(e){
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 }
 
@@ -18,6 +18,6 @@ exports.getStages = async function(req, res, next){
         return res.status(200).json(teams);
     }
     catch(e){
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 }

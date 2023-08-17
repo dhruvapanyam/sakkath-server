@@ -10,7 +10,7 @@ exports.getFixtures = async function(req, res, next){
         return res.status(200).json(matches);
     }
     catch(e){
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 }
 
@@ -21,7 +21,7 @@ exports.getFixturesByDay = async function(req, res, next){
         return res.status(200).json(teams);
     }
     catch(e){
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 }
 
@@ -65,7 +65,7 @@ exports.addResult = async function(req, res, next){
     }
     catch(e){
         console.log('err add result:',e)
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 
 }
@@ -91,7 +91,7 @@ exports.addSpiritScore = async function(req, res, next){
     }
     catch(e){
         console.log('err add result:',e)
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 
 }
@@ -107,6 +107,6 @@ exports.addFixture = async function(req, res, next){
         return res.status(200).json(teams);
     }
     catch(e){
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 }

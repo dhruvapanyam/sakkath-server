@@ -6,7 +6,7 @@ verifyToken = (req, res, next) => {
     let token = req.body.token || req.header('x-auth-token');
 
     if (!token) {
-        return res.status(400).json({
+        return res.status(500).json({
         message: "No token provided!",
         });
     }
@@ -18,7 +18,7 @@ verifyToken = (req, res, next) => {
         (err, decoded) => {
             if (err) {
                 // console.log('err auth token',err.name)
-                return res.status(400).json({
+                return res.status(500).json({
                     token_err: true,
                     expired: err.name == 'TokenExpiredError',  
                     message: "Unauthorized!",
@@ -39,7 +39,7 @@ isAdmin = async (req, res, next) => {
         return next();
     }
 
-    return res.status(400).json({
+    return res.status(500).json({
       message: "Requires admin role!",
     });
   } catch (error) {
@@ -58,7 +58,7 @@ isCaptain = async (req, res, next) => {
           return next();
       }
   
-      return res.status(400).json({
+      return res.status(500).json({
         message: "Require Admin Role!",
       });
     } catch (error) {

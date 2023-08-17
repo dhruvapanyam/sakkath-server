@@ -9,8 +9,10 @@ app.use(cors())
 const fs = require('fs');
 const cert = fs.readFileSync('./certificate.crt');
 const key = fs.readFileSync('./private.key');
-
 const creds = {key, cert};
+const https = require('https');
+const httpsServer = https.createServer(creds, app);
+httpsServer.listen(443);
 
 app.use(function(req, res, next) {
     res.header(
@@ -46,7 +48,7 @@ const authJwt = require('./middleware/auth_jwt');
 const TournamentService = require('./services/tournament');
 const { isAdmin, verifyToken } = require('./middleware/auth_jwt');
 
-const DB_NAME = 'sakkath-final-demo'
+const DB_NAME = 'sakkath-official'
 
 mongoose.connect(
     `mongodb+srv://dhruvapanyam16:dhruvapanyam@sakkath-db.ihmzxku.mongodb.net/?retryWrites=true&w=majority`,{
@@ -58,7 +60,7 @@ mongoose.connect(
     console.log('connected to the DB!')
 })
 
-// const team_details = require('./team_details/team_details.json')
+const team_details = require('./team_details/team_details.json')
 
 
 async function setup_new_database(){
@@ -284,9 +286,6 @@ async function load_database_json(filename){
 // --------------------------------------------------------------------------------
 async function run(){
 
-    // setup_new_database();
-    // save_database_json();
-    // load_database_json('sakkath-demo-1_1692251231599.json')
 }
 run();
 // --------------------------------------------------------------------------------
@@ -361,7 +360,7 @@ app.post('/schedule_load', verifyToken, isAdmin, async (req, res) => {
     }
     catch(e){
         console.log(e);
-        res.status(400).json({message: e})
+        res.status(500).json({message: e})
     }
 })
 
@@ -372,7 +371,7 @@ app.post('/schedule_start', verifyToken, isAdmin, async (req, res) => {
     }
     catch(e){
         console.log(e);
-        res.status(400).json({message: e})
+        res.status(500).json({message: e})
     }
 })
 
@@ -398,7 +397,7 @@ app.post('/schedule_change', verifyToken, isAdmin, async (req, res) => {
     }
     catch(e){
         console.log(e)
-        res.status(400).json({message: e})
+        res.status(500).json({message: e})
     }
 })
 
@@ -421,7 +420,7 @@ app.get('/timeslots', verifyToken, isAdmin, async (req, res) => {
     }
     catch(e){
         console.log(e)
-        res.status(400).json({message: e})
+        res.status(500).json({message: e})
     }
 })
 
@@ -447,7 +446,7 @@ app.post('/timeslots_change', verifyToken, isAdmin, async (req, res) => {
     }
     catch(e){
         console.log(e)
-        res.status(400).json({message: e})
+        res.status(500).json({message: e})
     }
 })
 
@@ -564,6 +563,7 @@ app.get('/spirit_ranking', async (req, res) => {
             results[team_spirit[team].division].push({
                 team_name: team_spirit[team].team_name,
                 rank: team_spirit[team].rank,
+                num_matches: team_spirit[team].spirit[1],
                 spirit: team_spirit[team].spirit[1] ? team_spirit[team].spirit[0] / team_spirit[team].spirit[1] : 0
             })
         }
@@ -607,7 +607,7 @@ app.get('/spirit_pending', async (req, res) => {
     }
     catch(e){
         console.log(e);
-        return res.status(400).json();
+        return res.status(500).json();
     }
 })
     
@@ -622,6 +622,4 @@ app.get('/health', (req, res) => {
 
 
 
-const https = require('https');
-const httpsServer = https.createServer(creds, app);
-httpsServer.listen(443);
+

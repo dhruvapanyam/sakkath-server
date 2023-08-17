@@ -14,7 +14,7 @@ const checkDuplicateUsername = async function(req, res, next){
         
     }
     catch(e){
-        return res.status(400).json({status: 400, message: e});
+        return res.status(500).json({status: 400, message: e});
     }
 }
 
