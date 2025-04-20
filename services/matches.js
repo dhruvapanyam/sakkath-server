@@ -30,7 +30,8 @@ exports.getMatchTimings = getMatchTimings;
 
 exports.getFixtures = async function(){
     // return all fixtures, with time slot data
-    var matches = await Match.find().populate("stage", "stage_name division").populate("team_1", "team_name logo").populate("team_2", "team_name logo");
+    var matches = await Match.find().populate("stage", "stage_name division").populate("team_1", "team_name logo").populate("team_2", "team_name logo")
+                            .select('team_1 team_2 rank_1 rank_2 stage match_number slot_number status result')
     
     return getMatchTimings(matches);
 
